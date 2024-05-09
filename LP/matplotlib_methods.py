@@ -134,6 +134,14 @@ def convert2label(coeffs, sign, bound):
 
 
 def get_bound(x1, x2, limit):
-    x_1 = [limit / x1, 0.0]
-    x_2 = [0.0, limit / x2]
+    if x1 is not 0:
+        x_1 = [limit / x1, 0.0]
+    else:
+        x_1 = [0.0, 0.0]
+
+    if x2 is not 0:
+        x_2 = [0.0, limit / x2]
+    else:
+        x_2 = [0.0, 0.0]
+
     return x_1, x_2

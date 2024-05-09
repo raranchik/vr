@@ -1,8 +1,8 @@
-from data_list import *
-from ortools_methods import *
-from matplotlib_methods import *
+from LP.data_list import *
+from LP.ortools_methods import *
+from LP.matplotlib_methods import *
 
-data = create_data2()
+data = create_data8()
 
 status, x_values, optimum, solver = solve(data, 'clp')
 print('Status code: %d\n' % status)
