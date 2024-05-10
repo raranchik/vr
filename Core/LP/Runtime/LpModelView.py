@@ -1,7 +1,6 @@
 import tkinter as tk
-
-from View.LP.LpProblemView import LpProblemView
-from View.LP.LpSolutionView import LpSolutionView
+from Core.LP.Runtime.LpProblemView import LpProblemView
+from Core.LP.Runtime.LpSolutionView import LpSolutionView
 
 
 class LpModelView(tk.Frame):

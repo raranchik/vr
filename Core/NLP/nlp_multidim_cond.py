@@ -1,6 +1,5 @@
-from pyomo.contrib.parmest.utils import ipopt_solve_with_stats
 from pyomo.environ import *
-from pyomo_helper import create_func_ref_dict
+from Core.Helper.pyomo_helper import create_func_ref_dict
 from definitions import IPOPT_PATH
 
 # Создаем модель

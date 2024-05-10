@@ -1,6 +1,6 @@
-from LP.data_list import *
-from LP.ortools_methods import *
-from LP.matplotlib_methods import *
+from Core.LP.Test.data_list import *
+from Core.LP.Test.ortools_methods import *
+from Core.LP.Test.matplotlib_methods import *
 
 data = create_data8()
 

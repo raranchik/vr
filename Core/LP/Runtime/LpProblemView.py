@@ -1,7 +1,6 @@
 import tkinter as tk
-
-from View.LP.LpConstraintsView import LpConstraintsView
-from View.LP.LpObjectiveView import LpObjectiveView
+from Core.LP.Runtime.LpConstraintsView import LpConstraintsView
+from Core.LP.Runtime.LpObjectiveView import LpObjectiveView
 
 
 class LpProblemView(tk.Frame):

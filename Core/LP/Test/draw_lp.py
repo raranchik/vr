@@ -5,6 +5,10 @@ from matplotlib import pyplot as plt
 from matplotlib.patches import Polygon
 
 data0 = {
+    'objective': {
+        'goal': 'min',
+        'coefficients': (.0, .0)
+    },
     'constraints': {
         'coefficients': [
             (3, 5, 30),
@@ -12,6 +16,10 @@ data0 = {
             (1, -3, 6)
         ],
         'signs': ['<=', '<=', '>=']
+    },
+    'vars_constraints': {
+        'coefficients': (.0, .0),
+        'signs': ['>=', '>=']
     }
 }
 

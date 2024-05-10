@@ -1,12 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
-
-from input_helper import on_validate_float
+from Core.Helper.input_helper import on_validate_float
 
 
 class LpObjectiveView(tk.Frame):
     x_coeffs = []
-    x_entries = []
 
     def __init__(self, master=None, cnf={}, **kw):
         super().__init__(master, cnf, **kw)
@@ -21,8 +19,9 @@ class LpObjectiveView(tk.Frame):
         label = tk.Label(frame, text=text, justify=tk.LEFT)
         label.pack(side=tk.LEFT)
         goals = ['min', 'max']
-        self.goal_combobox = ttk.Combobox(frame, values=goals, state='readonly', width=4, justify=tk.LEFT)
-        self.goal_combobox.current(0)
+        self.goal = tk.StringVar(value='min')
+        self.goal_combobox = ttk.Combobox(frame, textvariable=self.goal, values=goals, state='readonly', width=4,
+                                          justify=tk.LEFT)
         self.goal_combobox.pack(side=tk.LEFT)
         text = 'значение функции:'
         label = tk.Label(frame, text=text, justify=tk.LEFT)
@@ -44,7 +43,6 @@ class LpObjectiveView(tk.Frame):
             label = tk.Label(frame, text=text, justify=tk.LEFT)
             label.pack(side=tk.LEFT)
             self.x_coeffs.append(x_coef)
-            self.x_entries.append(x_entry)
 
             if i < n - 1:
                 label = tk.Label(frame, text='+', justify=tk.LEFT)
@@ -62,3 +60,6 @@ class LpObjectiveView(tk.Frame):
 
     def get_coeffs(self):
         return self.x_coeffs
+
+    def get_objective_goal(self):
+        return self.goal

@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from View.ModelsView import ModelsView
+from Core.ModelsView import ModelsView
 
 
 class App(tk.Tk):
@@ -41,8 +41,3 @@ class App(tk.Tk):
         y = (screen_height - window_height) // 2
 
         self.geometry(f"{window_width}x{window_height}+{x}+{y}")
-
-
-if __name__ == "__main__":
-    app = App()
-    app.mainloop()

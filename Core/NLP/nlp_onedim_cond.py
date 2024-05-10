@@ -1,6 +1,6 @@
 from pyomo.environ import *
 
-from pyomo_helper import create_func_ref_dict
+from Core.Helper.pyomo_helper import create_func_ref_dict
 from definitions import IPOPT_PATH
 
 # Создаем модель

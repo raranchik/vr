@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from View.LP.LpModelView import LpModelView
+from Core.LP.Runtime.LpModelView import LpModelView
 
 
 class ModelsView(tk.Frame):
