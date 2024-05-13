@@ -6,8 +6,8 @@ from matplotlib.patches import Polygon
 
 data0 = {
     'objective': {
-        'goal': 'min',
-        'coefficients': (.0, .0)
+        'goal': 'max',
+        'coefficients': (5., -1.)
     },
     'constraints': {
         'coefficients': [
@@ -250,12 +250,12 @@ def draw_intersections_and_lines_and_polygons_test(lines, intersections, polygon
     plt.show()
 
 
-data = data2
+data = data0
 
 constraints = data['constraints']['coefficients']
 signs = data['constraints']['signs']
 c_intersections = find_intersections_between(constraints)
-draw_intersections_and_lines_test(constraints, c_intersections, 'constraints vs constraints')
+# draw_intersections_and_lines_test(constraints, c_intersections, 'constraints vs constraints')
 
 var_constraints0 = [
     (0, 1, 0),
@@ -263,7 +263,7 @@ var_constraints0 = [
 ]
 var_signs0 = ['>=', '>=']
 v0_intersections = find_intersections_with(constraints, var_constraints0)
-draw_intersections_and_lines_test(var_constraints0, v0_intersections, 'constraints vs v0_constraints')
+# draw_intersections_and_lines_test(var_constraints0, v0_intersections, 'constraints vs v0_constraints')
 
 c_intersections = np.concatenate((c_intersections, [[.0, .0]]), axis=0)
 intersections = np.concatenate((c_intersections, v0_intersections), axis=0)
@@ -277,25 +277,25 @@ var_constraints1 = [
 ]
 var_signs1 = ['<=', '<=']
 v1_intersections = find_intersections_with(constraints, var_constraints1)
-draw_intersections_and_lines_test(var_constraints1, v1_intersections, 'constraints vs v1_constraints')
+# draw_intersections_and_lines_test(var_constraints1, v1_intersections, 'constraints vs v1_constraints')
 
 v1_intersections = np.concatenate((v1_intersections, [[0., y_max], [x_max, .0], [x_max, y_max]]), axis=0)
 
 all_intersections = np.concatenate((c_intersections, v0_intersections, v1_intersections), axis=0)
 all_intersections = unique_points(all_intersections)
 all_constraints = constraints + var_constraints0 + var_constraints1
-draw_intersections_and_lines_test(all_constraints, all_intersections,
-                                  'constraints vs constraints & v0_constraints & v1_constraints')
+# draw_intersections_and_lines_test(all_constraints, all_intersections,
+#                                   'constraints vs constraints & v0_constraints & v1_constraints')
 
 var_constraints = var_constraints0 + var_constraints1
 var_signs = var_signs0 + var_signs1
 boundary_points = not_satisfy_constraints(all_intersections, var_constraints, var_signs)
-draw_intersections_and_lines_test(constraints, boundary_points, 'constraints vs boundary box')
+# draw_intersections_and_lines_test(constraints, boundary_points, 'constraints vs boundary box')
 
 odr_polygons = find_odr_polygons(boundary_points, constraints, signs)
 sorted_odr_polygons = sort_polygon_points(odr_polygons)
-draw_polygons_test(sorted_odr_polygons, 'polygons')
+# draw_polygons_test(sorted_odr_polygons, 'polygons')
 
-draw_intersections_and_lines_and_polygons_test(constraints, boundary_points, sorted_odr_polygons)
+draw_intersections_and_lines_and_polygons_test(constraints, c_intersections, sorted_odr_polygons)
 
 g = 1

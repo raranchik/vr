@@ -19,7 +19,7 @@ class LpObjectiveView(tk.Frame):
         label = tk.Label(frame, text=text, justify=tk.LEFT)
         label.pack(side=tk.LEFT)
         goals = ['min', 'max']
-        self.goal = tk.StringVar(value='min')
+        self.goal = tk.StringVar(value='max')
         self.goal_combobox = ttk.Combobox(frame, textvariable=self.goal, values=goals, state='readonly', width=4,
                                           justify=tk.LEFT)
         self.goal_combobox.pack(side=tk.LEFT)
@@ -61,5 +61,5 @@ class LpObjectiveView(tk.Frame):
     def get_coeffs(self):
         return self.x_coeffs
 
-    def get_objective_goal(self):
+    def get_goal(self):
         return self.goal

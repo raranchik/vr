@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
+
+from Core.LP.Runtime.LpController import LpController
 from Core.ModelsView import ModelsView
 
 
@@ -27,6 +29,8 @@ class App(tk.Tk):
         self.history_view = tk.Frame(self)
         self.history_view.pack(expand=True, fill=tk.BOTH)
         self.notebook.add(self.history_view, text='История')
+
+        self.lp_controller = LpController(self.models_view.get_lp_problem_view())
 
         self.models_view.show()
 

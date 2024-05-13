@@ -63,17 +63,6 @@ class LpConstraintsView(tk.Frame):
 
         canvas.bind('<Configure>', configure_canvas)
 
-        frame = tk.Frame(self, bg='#53997f')
-        frame.pack(side=tk.BOTTOM, fill=tk.X)
-        frame.grid_columnconfigure(0, weight=1)
-        frame.grid_columnconfigure(1, weight=1)
-        text = 'Решить'
-        solve_button = tk.Button(frame, text=text)
-        solve_button.grid(row=0, column=0)
-        text = 'Очистить'
-        clear_button = tk.Button(frame, text=text)
-        clear_button.grid(row=0, column=1)
-
     def hide(self):
         return
 
@@ -83,7 +72,7 @@ class LpConstraintsView(tk.Frame):
     def add_constraint(self):
         delete_cmnd = lambda cnstrnt: self.remove_constraint(cnstrnt)
         constraint = LpConstraintView(delete_cmnd, self.constraints_frame)
-        constraint.pack(side=tk.TOP)
+        constraint.pack(side=tk.TOP, expand=False)
         self.constraints.append(constraint)
 
     def remove_constraint(self, constraint):
@@ -93,12 +82,12 @@ class LpConstraintsView(tk.Frame):
         constraint.pack_forget()
         constraint.destroy()
 
+    def remove_constraints(self):
+        for constraint in self.constraints:
+            self.remove_constraint(constraint)
+
     def get_vars_constraints_sign(self):
         return self.vars_cnsts_sign
 
-    def get_constraints_data(self):
-        signs = []
-        coeffs = []
-        for constraint in self.constraints:
-            break
-        return
+    def get_constraints(self):
+        return self.constraints
