@@ -9,19 +9,19 @@ class ModelsView(tk.Frame):
     def __init__(self, master=None, cnf={}, **kw):
         super().__init__(master, cnf, **kw)
 
-        self.buttons_list = tk.Frame(self, bg='#FF5555')
+        self.buttons_list = tk.Frame(self)
         self.buttons_list.place(anchor=tk.NW, relwidth=.2, relheight=1.)
 
-        self.overview = tk.Frame(self, bg='#CA6666')
+        self.overview = tk.Frame(self)
         self.overview.place(anchor=tk.NW, relx=.2, relwidth=.8, relheight=1.)
 
         self.lp_button = tk.Button(self.buttons_list, text='ЛП')
         self.lp_button.pack(side=tk.TOP, fill=tk.X)
-        self.lp_view = LpModelView(self.overview, bg='#8dc992')
+        self.lp_view = LpModelView(self.overview)
         self.lp_button.configure(command=self.show_lp_view)
 
-        self.nlp_button = tk.Button(self.buttons_list, text='НЛП')
-        self.nlp_button.pack(side=tk.TOP, fill=tk.X)
+        # self.nlp_button = tk.Button(self.buttons_list, text='НЛП')
+        # self.nlp_button.pack(side=tk.TOP, fill=tk.X)
 
         overview_label_text = 'Для решения задачи:\n1. Выберите тип модели или метода.\n2. Введите условие задачи.\n'
         self.overview_label = tk.Label(self.overview, text=overview_label_text, justify=tk.LEFT)
@@ -47,7 +47,6 @@ class ModelsView(tk.Frame):
             return
 
         self.hide_tutorial_label()
-        self.lp_view.show()
         self.lp_view.pack(fill=tk.BOTH, expand=True)
 
         self.active_view = self.lp_view
@@ -57,7 +56,6 @@ class ModelsView(tk.Frame):
             return
 
         self.lp_view.pack_forget()
-        self.lp_view.hide()
 
     def get_lp_problem_view(self) -> LpModelView:
         return self.lp_view

@@ -7,7 +7,7 @@ class LpConstraintView(tk.Frame):
     def __init__(self, delete_cmnd, master=None, cnf={}, **kw):
         super().__init__(master, cnf, **kw)
 
-        self.lhs = []
+        self.lhs: list[tk.DoubleVar] = []
         n = 2
         for cnstr_id in range(n):
             x_coef = tk.DoubleVar(value=.0)
@@ -45,3 +45,9 @@ class LpConstraintView(tk.Frame):
 
     def get_bound(self):
         return self.rhs
+
+    def set_data(self, coeffs, sign):
+        self.lhs[0].set(coeffs[0])
+        self.lhs[1].set(coeffs[1])
+        self.rhs.set(coeffs[2])
+        self.sign.set(sign)

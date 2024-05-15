@@ -1,70 +1,75 @@
 import tkinter as tk
+
 from tkinter import ttk
 
-import matplotlib
-import numpy as np
-from matplotlib import pyplot as plt, animation
-from matplotlib.animation import FuncAnimation
-from matplotlib.backends._backend_tk import NavigationToolbar2Tk
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.figure import Figure
-
-from Core.Helper.lp_bank import problem1
-from Core.Helper.lp_helper import solve_lp
-from Core.Helper.lp_plot_helper import get_last_sequence_solution_plot_animated, get_sequence_solution_plot, \
-    OPTIMAL_SOLUTION_COLOR, POINT_MARKER, LINES_LINESTYLE, LINES_WIDTH
-from Core.LP.Runtime.LpProblemData import LpProblemData
-
-matplotlib.use('TkAgg')
+from Core.Event import Event
+from Core.LP.Runtime.LpSolutionGraphManager import LpSolutionGraphManager
+from Core.LP.Runtime.LpSolutionView import LpSolutionView
 
 
 class LpSolutionsView(tk.Frame):
     def __init__(self, master=None, cnf={}, **kw):
         super().__init__(master, cnf, **kw)
 
-        # frame = tk.Frame(self, bg='#de00da')
-        # frame.pack(fill=tk.BOTH, expand=True)
-        # canvas = tk.Canvas(frame, bg='#ff1500')
-        # scrollbar = tk.Scrollbar(frame, orient=tk.VERTICAL, command=canvas.yview, bg='#00ff44')
-        # scrollbar.pack(side=tk.RIGHT, fill=tk.Y, expand=True)
-        # canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        # self.solutions_frame = tk.Frame(canvas)
-        #
-        # def on_frame_configure(e):
-        #     canvas.configure(scrollregion=canvas.bbox("all"))
-        #
-        # self.solutions_frame.bind("<Configure>", on_frame_configure)
-        # solutions_frame_id = canvas.create_window((0, 0), window=self.solutions_frame, anchor=tk.NW)
-        # canvas.configure(yscrollcommand=scrollbar.set)
-        #
-        # def on_mousewheel(e):
-        #     canvas.yview_scroll(int(-1 * (e.delta / 120)), "units")
-        #
-        # canvas.bind_all("<MouseWheel>", on_mousewheel)
-        # canvas.xview_moveto(0)
-        # canvas.yview_moveto(0)
-        #
-        # def configure_frame(e):
-        #     size = (self.solutions_frame.winfo_reqwidth(), self.solutions_frame.winfo_reqheight())
-        #     canvas.config(scrollregion="0 0 %s %s" % size)
-        #     if self.solutions_frame.winfo_reqwidth() != canvas.winfo_width():
-        #         canvas.config(width=self.solutions_frame.winfo_reqwidth())
-        #
-        # self.solutions_frame.bind('<Configure>', configure_frame)
-        #
-        # def configure_canvas(e):
-        #     if self.solutions_frame.winfo_reqwidth() != canvas.winfo_width():
-        #         canvas.itemconfigure(solutions_frame_id, width=canvas.winfo_width())
-        #
-        # canvas.bind('<Configure>', configure_canvas)
+        self.notebook = ttk.Notebook(self, padding=0)
+        self.notebook.grid(row=0, column=0, sticky=tk.NSEW)
+        self.notebook.bind('<<NotebookTabChanged>>', self.__on_tab_change)
+        self.columnconfigure(index=0, weight=1)
+        self.rowconfigure(index=0, weight=1)
 
-    def hide(self):
-        return
+        self.selected_solution = -1
+        self.solutions = []
+        self.on_tab_change_event = Event()
 
-    def show(self):
-        return
+    def add_solution(self, visualize_manager: LpSolutionGraphManager):
+        self.__deselect_solution(self.selected_solution)
 
-    def add(self, plot):
-        self.plot = plot
-        canvas = FigureCanvasTkAgg(self.plot[0], master=self)
-        canvas.get_tk_widget().grid(column=0, row=1)
+        frame = tk.Frame(self.notebook)
+        solution = LpSolutionView(visualize_manager, master=frame)
+        frame.pack(fill=tk.BOTH, expand=True)
+        solution.pack(fill=tk.BOTH, expand=True)
+        self.solutions.append(solution)
+
+        idx = len(self.solutions) - 1
+        self.notebook.add(frame, text=str(idx), padding=0, sticky=tk.NS + tk.EW, compound=tk.TOP)
+
+        self.__select_solution(idx)
+        self.notebook.select(idx)
+
+    def __select_solution(self, idx: int):
+        if idx == self.selected_solution:
+            return
+
+        if idx < 0 or idx >= len(self.solutions):
+            return
+
+        solution = self.solutions[idx]
+        solution.on_select()
+        solution.pack(fill=tk.BOTH, expand=True)
+
+        self.selected_solution = idx
+
+    def __deselect_solution(self, idx: int):
+        if idx < 0 or idx >= len(self.solutions):
+            return
+
+        solution = self.solutions[idx]
+        solution.on_deselect()
+        solution.pack_forget()
+
+    def __get_selected_tab_id(self) -> int:
+        if self.notebook.select() == '':
+            return -1
+
+        return self.notebook.index(self.notebook.select())
+
+    def __on_tab_change(self, e):
+        if self.selected_solution < 0:
+            return
+
+        if self.selected_solution == self.__get_selected_tab_id():
+            return
+
+        self.__deselect_solution(self.selected_solution)
+        self.__select_solution(self.__get_selected_tab_id())
+        self.on_tab_change_event.notify(idx=self.selected_solution)

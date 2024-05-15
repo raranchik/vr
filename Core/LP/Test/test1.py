@@ -1,28 +1,33 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
-from functools import partial
+import tkinter as tk
+from Core.ScrollableFrame import ScrollableFrame
 
-import matplotlib
-matplotlib.use('TkAgg')
 
-fig, ax = plt.subplots()
-line1, = ax.plot([], [], 'ro')
+class App(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("VR")
+        self.setup_window()
 
-def init():
-    ax.set_xlim(0, 2*np.pi)
-    ax.set_ylim(-1, 1)
-    return line1,
+        frame = ScrollableFrame(self)
+        frame.pack(fill=tk.BOTH, expand=True)
+        for i in range(20):
+            for j in range(20):
+                lbl = tk.Label(frame.get_container(), text=f"Label {i}")
+                lbl.grid(column=i, row=j)
 
-def update(frame, ln, x, y):
-    x.append(frame)
-    y.append(np.sin(frame))
-    ln.set_data(x, y)
-    return ln,
+    def setup_window(self):
+        window_width = 400
+        window_height = 400
 
-ani = FuncAnimation(
-    fig, partial(update, ln=line1, x=[], y=[]),
-    frames=np.linspace(0, 2*np.pi, 128),
-    init_func=init, blit=True)
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
 
-plt.show()
+        x = (screen_width - window_width) // 2
+        y = (screen_height - window_height) // 2
+
+        self.geometry(f"{window_width}x{window_height}+{x}+{y}")
+
+
+if __name__ == "__main__":
+    app = App()
+    app.mainloop()

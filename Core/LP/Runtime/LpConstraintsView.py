@@ -1,16 +1,15 @@
 import tkinter as tk
 from tkinter import ttk
 from Core.LP.Runtime.LpConstraintView import LpConstraintView
+from Core.Pool import Pool
 
 
 class LpConstraintsView(tk.Frame):
-    constraints = []
-
     def __init__(self, master=None, cnf={}, **kw):
         super().__init__(master, cnf, **kw)
 
         text = 'Добавить ограничение'
-        add_constraint_button = tk.Button(self, text=text, command=self.add_constraint)
+        add_constraint_button = tk.Button(self, text=text, command=self.__add_constraint)
         add_constraint_button.pack(side=tk.TOP)
 
         frame = tk.Frame(self)
@@ -27,67 +26,79 @@ class LpConstraintsView(tk.Frame):
         label = tk.Label(frame, text=text, justify=tk.LEFT)
         label.pack(side=tk.LEFT, fill=tk.X)
 
-        frame = tk.Frame(self, bg='#de00da')
+        self.constraints: list[LpConstraintView] = []
+
+        frame = tk.Frame(self)
         frame.pack(fill=tk.BOTH, expand=True)
-        canvas = tk.Canvas(frame, bg='#ff1500')
-        scrollbar = tk.Scrollbar(frame, orient=tk.VERTICAL, command=canvas.yview, bg='#00ff44')
+        canvas = tk.Canvas(frame)
+        scrollbar = tk.Scrollbar(frame, orient=tk.VERTICAL, command=canvas.yview)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y, expand=False)
         canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         self.constraints_frame = tk.Frame(canvas)
 
-        def on_frame_configure(e):
+        def __on_frame_configure(e):
             canvas.configure(scrollregion=canvas.bbox("all"))
 
-        self.constraints_frame.bind("<Configure>", on_frame_configure)
-        constraints_frame_id = canvas.create_window((0, 0), window=self.constraints_frame, anchor=tk.NW)
+        self.constraints_frame.bind("<Configure>", __on_frame_configure)
+        canvas.create_window((0, 0), window=self.constraints_frame, anchor=tk.NW)
         canvas.configure(yscrollcommand=scrollbar.set)
 
-        def on_mousewheel(e):
+        def __on_mousewheel(e):
             canvas.yview_scroll(int(-1 * (e.delta / 120)), "units")
 
-        canvas.bind_all("<MouseWheel>", on_mousewheel)
+        canvas.bind_all("<MouseWheel>", __on_mousewheel)
         canvas.xview_moveto(0)
         canvas.yview_moveto(0)
 
-        def configure_frame(e):
+        def __configure_frame(e):
             size = (self.constraints_frame.winfo_reqwidth(), self.constraints_frame.winfo_reqheight())
             canvas.config(scrollregion="0 0 %s %s" % size)
             if self.constraints_frame.winfo_reqwidth() != canvas.winfo_width():
                 canvas.config(width=self.constraints_frame.winfo_reqwidth())
 
-        self.constraints_frame.bind('<Configure>', configure_frame)
+        self.constraints_frame.bind('<Configure>', __configure_frame)
 
-        def configure_canvas(e):
-            if self.constraints_frame.winfo_reqwidth() != canvas.winfo_width():
-                canvas.itemconfigure(constraints_frame_id, width=canvas.winfo_width())
-
-        canvas.bind('<Configure>', configure_canvas)
-
-    def hide(self):
-        return
-
-    def show(self):
-        return
-
-    def add_constraint(self):
-        delete_cmnd = lambda cnstrnt: self.remove_constraint(cnstrnt)
-        constraint = LpConstraintView(delete_cmnd, self.constraints_frame)
-        constraint.pack(side=tk.TOP, expand=False)
-        self.constraints.append(constraint)
-
-    def remove_constraint(self, constraint):
-        if constraint not in self.constraints:
-            return
-
-        constraint.pack_forget()
-        constraint.destroy()
+        self.constraints_pool = Pool(self.__create_constraint)
 
     def remove_constraints(self):
         for constraint in self.constraints:
-            self.remove_constraint(constraint)
+            self.__remove_constraint(constraint)
 
-    def get_vars_constraints_sign(self):
+    def get_vars_constraints_sign(self) -> tk.StringVar:
         return self.vars_cnsts_sign
 
-    def get_constraints(self):
+    def get_constraints(self) -> list[LpConstraintView]:
         return self.constraints
+
+    def set_data(self, consrts_data, var_consrts_data):
+        consrts_c = consrts_data['coefficients']
+        consrts_s = consrts_data['signs']
+
+        n = len(consrts_c)
+        for i, constraint in enumerate(self.constraints[n:]):
+            self.__remove_constraint(constraint)
+
+        n = n - len(self.constraints)
+        for i in range(n):
+            self.__add_constraint()
+
+        for i, constraint in enumerate(self.constraints):
+            constraint.set_data(consrts_c[i], consrts_s[i])
+
+        var_consrts_s = var_consrts_data['signs']
+        self.vars_cnsts_sign.set(var_consrts_s[0])
+
+    def __add_constraint(self):
+        constraint = self.constraints_pool.acquire()
+        constraint.pack(side=tk.TOP, expand=False)
+        self.constraints.append(constraint)
+
+    def __remove_constraint(self, constraint):
+        constraint.pack_forget()
+        self.constraints.remove(constraint)
+        self.constraints_pool.release(constraint)
+
+    def __create_constraint(self):
+        constraint = LpConstraintView(self.__remove_constraint, self.constraints_frame)
+
+        return constraint

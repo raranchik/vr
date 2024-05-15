@@ -16,19 +16,19 @@ class App(tk.Tk):
 
         self.models_view = ModelsView(self)
         self.models_view.pack(expand=True, fill=tk.BOTH)
-        self.notebook.add(self.models_view, text='Модели и методы')
+        self.notebook.add(self.models_view, text='Модуль "Визуализация"')
 
         self.example_view = tk.Frame(self)
         self.example_view.pack(expand=True, fill=tk.BOTH)
-        self.notebook.add(self.example_view, text='Примеры')
-
-        self.theory_view = tk.Frame(self)
-        self.theory_view.pack(expand=True, fill=tk.BOTH)
-        self.notebook.add(self.theory_view, text='Теория')
-
-        self.history_view = tk.Frame(self)
-        self.history_view.pack(expand=True, fill=tk.BOTH)
-        self.notebook.add(self.history_view, text='История')
+        self.notebook.add(self.example_view, text='Модуль "Банк задач"')
+        #
+        # self.theory_view = tk.Frame(self)
+        # self.theory_view.pack(expand=True, fill=tk.BOTH)
+        # self.notebook.add(self.theory_view, text='Теория')
+        #
+        # self.history_view = tk.Frame(self)
+        # self.history_view.pack(expand=True, fill=tk.BOTH)
+        # self.notebook.add(self.history_view, text='История')
 
         self.lp_controller = LpController(self.models_view.get_lp_problem_view())
 
