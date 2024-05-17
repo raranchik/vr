@@ -1,4 +1,6 @@
 import tkinter as tk
+from tkinter import ttk
+
 from Core.LP.Runtime.LpConstraintsView import LpConstraintsView
 from Core.LP.Runtime.LpObjectiveView import LpObjectiveView
 
@@ -8,21 +10,27 @@ class LpProblemView(tk.Frame):
         super().__init__(master, cnf, **kw)
 
         self.objective = LpObjectiveView(self)
-        self.objective.place(anchor=tk.NW, relwidth=1., relheight=0.2)
+        self.objective.pack(side=tk.TOP, anchor=tk.NW)
+
+        separator = ttk.Separator(self, orient=tk.HORIZONTAL)
+        separator.pack(side=tk.TOP, fill=tk.X, pady=5)
 
         self.constraints = LpConstraintsView(self)
-        self.constraints.place(anchor=tk.NW, rely=.2, relwidth=1., relheight=.8)
+        self.constraints.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+        separator = ttk.Separator(self, orient=tk.HORIZONTAL)
+        separator.pack(side=tk.TOP, fill=tk.X, pady=5)
 
         frame = tk.Frame(self)
-        frame.pack(side=tk.BOTTOM, fill=tk.X)
-        frame.grid_columnconfigure(0, weight=1)
-        frame.grid_columnconfigure(1, weight=1)
+        frame.pack(side=tk.BOTTOM)
+
         text = 'Решить'
-        self.solve_button = tk.Button(frame, text=text)
-        self.solve_button.grid(row=0, column=0)
+        self.solve_button = tk.Button(frame, text=text, padx=20)
+        self.solve_button.pack(side=tk.LEFT, padx=10, pady=5)
+
         text = 'Очистить'
-        clear_button = tk.Button(frame, text=text, command=self.constraints.remove_constraints)
-        clear_button.grid(row=0, column=1)
+        clear_button = tk.Button(frame, text=text, command=self.constraints.remove_constraints, padx=20)
+        clear_button.pack(side=tk.LEFT, padx=10, pady=5)
 
     def get_objective_input(self) -> tuple[tk.StringVar, list]:
         goal = self.objective.get_goal()

@@ -61,9 +61,11 @@ class LpProblemData:
             return True
 
         for i, (a0, b0, c0) in enumerate(consrts_c):
+            if math.isclose(c0, .0, abs_tol=ABS_TOL):
+                return True
+
             if (math.isclose(a0, .0, abs_tol=ABS_TOL)
-                    and math.isclose(b0, .0, abs_tol=ABS_TOL)
-                    and math.isclose(c0, .0, abs_tol=ABS_TOL)):
+                    and math.isclose(b0, .0, abs_tol=ABS_TOL)):
                 return True
 
         return False

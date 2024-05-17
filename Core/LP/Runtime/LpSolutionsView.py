@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from Core.Event import Event
-from Core.LP.Runtime.LpSolutionGraphManager import LpSolutionGraphManager
+from Core.LP.Runtime.LpGraphBuilder import LpGraphBuilder
 from Core.LP.Runtime.LpSolutionView import LpSolutionView
 
 
@@ -21,7 +21,7 @@ class LpSolutionsView(tk.Frame):
         self.solutions = []
         self.on_tab_change_event = Event()
 
-    def add_solution(self, visualize_manager: LpSolutionGraphManager):
+    def add_solution(self, visualize_manager: LpGraphBuilder):
         self.__deselect_solution(self.selected_solution)
 
         frame = tk.Frame(self.notebook)

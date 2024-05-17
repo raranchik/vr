@@ -7,12 +7,9 @@ class LpObjectiveView(tk.Frame):
     def __init__(self, master=None, cnf={}, **kw):
         super().__init__(master, cnf, **kw)
 
-        sticky = tk.W
-        for c in range(3):
-            self.rowconfigure(index=c, weight=1)
-
         frame = tk.Frame(self)
-        frame.grid(row=0, sticky=sticky)
+        frame.pack(side=tk.TOP, anchor=tk.NW)
+
         text = 'Найти'
         label = tk.Label(frame, text=text, justify=tk.LEFT)
         label.pack(side=tk.LEFT)
@@ -21,17 +18,20 @@ class LpObjectiveView(tk.Frame):
         self.goal_combobox = ttk.Combobox(frame, textvariable=self.goal_var, values=goals, state='readonly', width=4,
                                           justify=tk.LEFT)
         self.goal_combobox.pack(side=tk.LEFT)
+
         text = 'значение функции:'
         label = tk.Label(frame, text=text, justify=tk.LEFT)
         label.pack(side=tk.LEFT)
 
         frame = tk.Frame(self)
-        frame.grid(row=1, sticky=sticky)
+        frame.pack(side=tk.TOP, anchor=tk.NW)
+
         text = 'F(x1, x2)='
         label = tk.Label(frame, text=text, justify=tk.LEFT)
         label.pack(side=tk.LEFT)
+
         n = 2
-        self.x_vars: list[tk.DoubleVar] = []
+        self.x_vars = []
         for i in range(n):
             x_var = tk.DoubleVar(value=.0)
             x_entry = ttk.Entry(frame, textvariable=x_var, width=6, validate='key', justify=tk.RIGHT)
@@ -49,13 +49,7 @@ class LpObjectiveView(tk.Frame):
 
         text = 'при следующих ограничениях:'
         label = tk.Label(self, text=text, justify=tk.LEFT)
-        label.grid(row=2, sticky=sticky)
-
-    def hide(self):
-        return
-
-    def show(self):
-        return
+        label.pack(side=tk.TOP, anchor=tk.NW)
 
     def get_coeffs(self):
         return self.x_vars

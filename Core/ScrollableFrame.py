@@ -1,5 +1,7 @@
 import tkinter as tk
 
+CONTAINER_TAG = 'container'
+
 
 class ScrollableFrame(tk.Frame):
     def __init__(self, master=None, cnf={}, **kw):
@@ -15,10 +17,14 @@ class ScrollableFrame(tk.Frame):
         self.h_scrollbar.pack(side=tk.BOTTOM, fill=tk.X)
         self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        self.canvas.create_window((0, 0), window=self.container, anchor=tk.NW)
+        self.canvas.create_window((0, 0), window=self.container, anchor=tk.NW, tags=CONTAINER_TAG)
 
-        self._bind_frame_configure()
-        self._bind_mouse_wheel()
+        self.mouse_wheel_binds = None
+        self.__frame_configure_bind = None
+        self.__resize_container_bind = None
+
+        self.__bind_frame_configure()
+        self.__bind_resize_container()
 
     def get_container(self) -> tk.Frame:
         return self.container
@@ -26,28 +32,60 @@ class ScrollableFrame(tk.Frame):
     def focus(self):
         self.canvas.xview_moveto(0)
         self.canvas.yview_moveto(0)
-        self._bind_mouse_wheel()
-        self._bind_frame_configure()
+        self.__bind_mouse_wheel()
 
     def unfocus(self):
-        self._unbind_mouse_wheel()
-        self._unbind_frame_configure()
+        self.__unbind_mouse_wheel()
 
-    def _bind_mouse_wheel(self):
-        self.canvas.bind_all('<MouseWheel>', self._on_mouse_wheel)
-        self.canvas.bind_all('<Button-4>', self._on_mouse_wheel)
-        self.canvas.bind_all('<Button-5>', self._on_mouse_wheel)
+    def __bind_mouse_wheel(self):
+        if self.mouse_wheel_binds is not None:
+            return
 
-    def _unbind_mouse_wheel(self):
-        self.canvas.unbind_all('<MouseWheel>')
-        self.canvas.unbind_all('<Button-4>')
-        self.canvas.unbind_all('<Button-5>')
+        self.mouse_wheel_binds = []
 
-    def _bind_frame_configure(self):
-        self.container.bind('<Configure>', self._on_frame_configure)
+        bind = self.canvas.bind_all('<MouseWheel>', self._on_mouse_wheel)
+        self.mouse_wheel_binds.append(('<MouseWheel>', bind))
 
-    def _unbind_frame_configure(self):
-        self.container.bind('<Configure>', self._on_frame_configure)
+        bind = self.canvas.bind_all('<Button-4>', self._on_mouse_wheel)
+        self.mouse_wheel_binds.append(('<Button-4>', bind))
+
+        bind = self.canvas.bind_all('<Button-5>', self._on_mouse_wheel)
+        self.mouse_wheel_binds.append(('<Button-5>', bind))
+
+    def __unbind_mouse_wheel(self):
+        if self.mouse_wheel_binds is None:
+            return
+
+        for bind in self.mouse_wheel_binds:
+            self.canvas.unbind(bind[0], bind[1])
+
+        self.mouse_wheel_binds = None
+
+    def __bind_frame_configure(self):
+        if self.__frame_configure_bind is not None:
+            return
+
+        self.__frame_configure_bind = self.container.bind('<Configure>', self.__on_frame_configure)
+
+    def __unbind_frame_configure(self):
+        if self.__frame_configure_bind is None:
+            return
+
+        self.container.unbind('<Configure>', self.__frame_configure_bind)
+        self.__frame_configure_bind = None
+
+    def __bind_resize_container(self):
+        if self.__resize_container_bind is not None:
+            return
+
+        self.__resize_container_bind = self.canvas.bind('<Configure>', self.__on_resize_container)
+
+    def __unbind_resize_container(self):
+        if self.__resize_container_bind is None:
+            return
+
+        self.canvas.unbind('<Configure>', self.__resize_container_bind)
+        self.__resize_container_bind = None
 
     def _on_mouse_wheel(self, e):
         if e.delta:
@@ -57,5 +95,8 @@ class ScrollableFrame(tk.Frame):
         elif e.num == 5:
             self.canvas.yview_scroll(1, tk.UNITS)
 
-    def _on_frame_configure(self, e):
+    def __on_frame_configure(self, e):
         self.canvas.configure(scrollregion=self.canvas.bbox(tk.ALL))
+
+    def __on_resize_container(self, e):
+        self.canvas.itemconfigure(CONTAINER_TAG, width=e.width)

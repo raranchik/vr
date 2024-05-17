@@ -8,10 +8,10 @@ class LpModelView(tk.Frame):
         super().__init__(master, cnf, **kw)
 
         self.problem_view = LpProblemView(self)
-        self.problem_view.place(anchor=tk.NW, relwidth=.3, relheight=1.)
+        self.problem_view.pack(side=tk.LEFT, fill=tk.Y)
 
         self.solution_view = LpSolutionsView(self)
-        self.solution_view.place(anchor=tk.NW, relx=.3, relwidth=.7, relheight=1.)
+        self.solution_view.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
     def get_problem_input(self):
         objective = self.problem_view.get_objective_input()

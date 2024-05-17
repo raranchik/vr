@@ -1,33 +1,27 @@
-import tkinter as tk
-from Core.ScrollableFrame import ScrollableFrame
+from Core.Helper.lp_bank import get_bank
+from Core.Helper.lp_helper import solve_lp
+from Core.LP.Runtime.LpProblemData import LpProblemData
 
+bank = get_bank()
+for key, value in bank.items():
+    print('##########################################################################')
+    print(f'Problem {key}')
+    problem = LpProblemData(value['data'])
+    solve_result = solve_lp(problem)
+    print(solve_result.status)
+    if solve_result.status == 0:
+        print('Optimization proceeding nominally.')
+        optimal_value = solve_result.fun if problem.get_goal() == 'min' else -solve_result.fun
+        print(f'Goal: {problem.get_goal()}')
+        print(f'Optimal value: {optimal_value}')
+        print(f'Optimal point: {solve_result.x}')
+    elif solve_result.status == 1:
+        print('Iteration limit reached.')
+    elif solve_result.status == 2:
+        print('Problem appears to be infeasible.')
+    elif solve_result.status == 3:
+        print('Problem appears to be unbounded.')
+    elif solve_result.status == 4:
+        print('Numerical difficulties encountered.')
 
-class App(tk.Tk):
-    def __init__(self):
-        super().__init__()
-        self.title("VR")
-        self.setup_window()
-
-        frame = ScrollableFrame(self)
-        frame.pack(fill=tk.BOTH, expand=True)
-        for i in range(20):
-            for j in range(20):
-                lbl = tk.Label(frame.get_container(), text=f"Label {i}")
-                lbl.grid(column=i, row=j)
-
-    def setup_window(self):
-        window_width = 400
-        window_height = 400
-
-        screen_width = self.winfo_screenwidth()
-        screen_height = self.winfo_screenheight()
-
-        x = (screen_width - window_width) // 2
-        y = (screen_height - window_height) // 2
-
-        self.geometry(f"{window_width}x{window_height}+{x}+{y}")
-
-
-if __name__ == "__main__":
-    app = App()
-    app.mainloop()
+    print(solve_result)

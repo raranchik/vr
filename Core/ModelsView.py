@@ -1,58 +1,59 @@
 import tkinter as tk
+from tkinter import ttk
 
 from Core.LP.Runtime.LpModelView import LpModelView
 
 
 class ModelsView(tk.Frame):
-    active_view = None
+    current_view = None
 
     def __init__(self, master=None, cnf={}, **kw):
         super().__init__(master, cnf, **kw)
 
         self.buttons_list = tk.Frame(self)
-        self.buttons_list.place(anchor=tk.NW, relwidth=.2, relheight=1.)
+        self.buttons_list.pack(side=tk.LEFT, fill=tk.Y)
+
+        separator = ttk.Separator(self, orient=tk.VERTICAL)
+        separator.pack(side=tk.LEFT, fill=tk.Y)
+
+        self.lp_button = tk.Button(self.buttons_list, text='ЛП', padx=20,
+                                   command=self.select_lp_view)
+        self.lp_button.pack(side=tk.TOP, padx=20, pady=20)
 
         self.overview = tk.Frame(self)
-        self.overview.place(anchor=tk.NW, relx=.2, relwidth=.8, relheight=1.)
+        self.overview.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        self.lp_button = tk.Button(self.buttons_list, text='ЛП')
-        self.lp_button.pack(side=tk.TOP, fill=tk.X)
         self.lp_view = LpModelView(self.overview)
-        self.lp_button.configure(command=self.show_lp_view)
-
-        # self.nlp_button = tk.Button(self.buttons_list, text='НЛП')
-        # self.nlp_button.pack(side=tk.TOP, fill=tk.X)
 
         overview_label_text = 'Для решения задачи:\n1. Выберите тип модели или метода.\n2. Введите условие задачи.\n'
-        self.overview_label = tk.Label(self.overview, text=overview_label_text, justify=tk.LEFT)
+        self.tutorial_label = tk.Label(self.overview, text=overview_label_text, justify=tk.LEFT)
+        self.__show_tutorial_label()
 
-    def show(self):
-        self.hide_lp_view()
-        self.show_tutorial_label()
+    def focus(self):
+        self.__deselect_lp()
+        self.__show_tutorial_label()
 
-    def hide(self):
-        if self.active_view is None:
+    def unfocus(self):
+        if self.current_view is None:
             return
 
-        self.active_view.hide()
+    def __show_tutorial_label(self):
+        self.tutorial_label.pack(fill=tk.BOTH, expand=True)
 
-    def show_tutorial_label(self):
-        self.overview_label.place(anchor=tk.CENTER, relx=.5, rely=.5)
+    def __hide_tutorial_label(self):
+        self.tutorial_label.pack_forget()
 
-    def hide_tutorial_label(self):
-        self.overview_label.place_forget()
-
-    def show_lp_view(self):
-        if self.active_view is self.lp_view:
+    def select_lp_view(self):
+        if self.current_view is self.lp_view:
             return
 
-        self.hide_tutorial_label()
+        self.__hide_tutorial_label()
         self.lp_view.pack(fill=tk.BOTH, expand=True)
 
-        self.active_view = self.lp_view
+        self.current_view = self.lp_view
 
-    def hide_lp_view(self):
-        if self.active_view is not self.lp_view:
+    def __deselect_lp(self):
+        if self.current_view is not self.lp_view:
             return
 
         self.lp_view.pack_forget()

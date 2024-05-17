@@ -1,8 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
 
+from Core.BanksView import BanksView
 from Core.LP.Runtime.LpController import LpController
 from Core.ModelsView import ModelsView
+
+MODELS_TAB_IDX = 0
+BANKS_TAB_IDX = 1
 
 
 class App(tk.Tk):
@@ -14,25 +18,15 @@ class App(tk.Tk):
         self.notebook = ttk.Notebook(self)
         self.notebook.pack(expand=True, fill=tk.BOTH)
 
-        self.models_view = ModelsView(self)
+        self.models_view = ModelsView(self.notebook)
         self.models_view.pack(expand=True, fill=tk.BOTH)
         self.notebook.add(self.models_view, text='Модуль "Визуализация"')
 
-        self.example_view = tk.Frame(self)
-        self.example_view.pack(expand=True, fill=tk.BOTH)
-        self.notebook.add(self.example_view, text='Модуль "Банк задач"')
-        #
-        # self.theory_view = tk.Frame(self)
-        # self.theory_view.pack(expand=True, fill=tk.BOTH)
-        # self.notebook.add(self.theory_view, text='Теория')
-        #
-        # self.history_view = tk.Frame(self)
-        # self.history_view.pack(expand=True, fill=tk.BOTH)
-        # self.notebook.add(self.history_view, text='История')
-
         self.lp_controller = LpController(self.models_view.get_lp_problem_view())
 
-        self.models_view.show()
+        self.banks_view = BanksView(master=self.notebook, args=(self.notebook, self.lp_controller, self.models_view))
+        self.banks_view.pack(expand=True, fill=tk.BOTH)
+        self.notebook.add(self.banks_view, text='Модуль "Банк задач"')
 
     def setup_window(self):
         window_width = 1280
