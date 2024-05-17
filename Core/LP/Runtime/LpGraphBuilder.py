@@ -199,7 +199,7 @@ class LpGraphBuilder:
         return fig, ax
 
     def build_result_graph(self):
-        if not self.solve_result.success:
+        if not self.solve_result.success and self.solve_result.status != 3:
             return None
 
         if RESULT_GRAPH_NAME in self.cache:
@@ -219,7 +219,15 @@ class LpGraphBuilder:
 
         x_lim = ax.get_xlim()
         x = np.linspace(x_lim[0], x_lim[1], 2)
-        optimal_point = self.solve_result.x
+
+        if self.solve_result.success:
+            optimal_point = self.solve_result.x
+        else:
+            y_lim = ax.get_ylim()
+            quarters = (0 if math.copysign(1, dir_to[0]) < .0 else 1,
+                        0 if math.copysign(1, dir_to[1]) < .0 else 1)
+            optimal_point = [x_lim[quarters[0]], y_lim[quarters[1]]]
+
         c = optimal_point[0] * objv_c[0] + optimal_point[1] * objv_c[1]
         y = (c - objv_c[0] * x) / objv_c[1]
 
@@ -232,47 +240,52 @@ class LpGraphBuilder:
                                      color=OPTIMAL_SOLUTION_COLOR, label=self.objective_to_str(),
                                      linewidth=LINES_WIDTH))
 
-        text = r'$\overline{C} - Градиент целевой функции$'
+        text = r'$\overline{C}$ - Градиент целевой функции'
         legend_handles.append(Line2D([.0], [.0], label=text, marker=r'$\longrightarrow$',
                                      color=OPTIMAL_SOLUTION_COLOR, linestyle='', markersize=20.))
 
-        optimal_value = self.solve_result.fun if self.problem.get_goal() == 'min' else -self.solve_result.fun
-        cache = self.cache[str(idx)]
-        odr_points = cache.odr_points
-        polygons_points = cache.polygons_points
-        n = len(polygons_points)
-        for i in range(n - 1):
-            lhs = polygons_points[i]
-            rhs = polygons_points[i + 1]
-            if self.__equal_points(lhs, rhs):
-                continue
+        if self.solve_result.success:
+            optimal_value = self.solve_result.fun if self.problem.get_goal() == 'min' else -self.solve_result.fun
+            cache = self.cache[str(idx)]
+            odr_points = cache.odr_points
+            polygons_points = cache.polygons_points
+            n = len(polygons_points)
+            for i in range(n - 1):
+                lhs = polygons_points[i]
+                rhs = polygons_points[i + 1]
+                lhs_is_optimal = False
+                rhs_is_optimal = False
+                if self.__equal_points(lhs, rhs):
+                    continue
 
-            lhs_value = objv_c[0] * lhs[0] + objv_c[1] * lhs[1]
-            lhs_is_optimal = math.isclose(lhs_value, optimal_value, abs_tol=ABS_TOL)
-            if not lhs_is_optimal:
-                continue
+                lhs_value = objv_c[0] * lhs[0] + objv_c[1] * lhs[1]
+                lhs_is_optimal = math.isclose(lhs_value, optimal_value, abs_tol=ABS_TOL)
+                if not lhs_is_optimal:
+                    continue
 
-            rhs_value = objv_c[0] * rhs[0] + objv_c[1] * rhs[1]
-            rhs_is_optimal = math.isclose(rhs_value, optimal_value, abs_tol=ABS_TOL)
-            if rhs_is_optimal:
-                break
+                rhs_value = objv_c[0] * rhs[0] + objv_c[1] * rhs[1]
+                rhs_is_optimal = math.isclose(rhs_value, optimal_value, abs_tol=ABS_TOL)
+                if rhs_is_optimal:
+                    break
 
-        lhs_in_odr = self.__contains_point(lhs, odr_points) and lhs_is_optimal
-        rhs_in_odr = self.__contains_point(rhs, odr_points) and rhs_is_optimal
-        symbols = ['(A)']
-        if lhs_in_odr and rhs_in_odr:
-            optimal_point = np.array([lhs, rhs])
-            symbols.append('(B)')
-        elif lhs_in_odr and not rhs_in_odr:
-            optimal_point = np.array([lhs])
-        elif not lhs_in_odr and rhs_in_odr:
-            optimal_point = np.array([rhs])
+            lhs_in_odr = self.__contains_point(lhs, odr_points) and lhs_is_optimal
+            rhs_in_odr = self.__contains_point(rhs, odr_points) and rhs_is_optimal
+            symbols = ['(A)']
+            if lhs_in_odr and rhs_in_odr:
+                optimal_point = np.array([lhs, rhs])
+                symbols.append('(B)')
+            elif lhs_in_odr and not rhs_in_odr:
+                optimal_point = np.array([lhs])
+            elif not lhs_in_odr and rhs_in_odr:
+                optimal_point = np.array([rhs])
+            else:
+                optimal_point = np.array([optimal_point])
+
+            text = 'Оптимальное значение ' + ", ".join(symbols)
+            legend_handles.append(Line2D([.0], [.0], label=text, marker='o',
+                                         color=OPTIMAL_SOLUTION_COLOR, linestyle=''))
         else:
-            optimal_point = np.array([optimal_point])
-
-        text = 'Оптимальное значение ' + ", ".join(symbols)
-        legend_handles.append(Line2D([.0], [.0], label=text, marker='o',
-                                     color=OPTIMAL_SOLUTION_COLOR, linestyle=''))
+            optimal_point = []
 
         fig, ax = self.__add_result_data_to_plot(fig, ax, dir_to_norm, lines, optimal_point)
         ax.set_title('ЛП - Результат решения задачи')
@@ -283,7 +296,7 @@ class LpGraphBuilder:
         return fig, ax
 
     def build_animated_result_graph(self):
-        if not self.solve_result.success:
+        if not self.solve_result.success and self.solve_result.status != 3:
             return None
 
         if RESULT_ANIMATED_GRAPH_NAME in self.cache:
@@ -294,14 +307,20 @@ class LpGraphBuilder:
         objv_c = self.problem.get_objv_c()
 
         dir_to = (objv_c[0], objv_c[1])
-        dir_to_magnitude = np.linalg.norm(dir_to)
+        dir_to_magnitude = np.linalg.norm(dir_to) / 2.
 
         step = 0.005
         n = int(dir_to_magnitude / step)
         x_lim = ax.get_xlim()
         x = np.linspace(x_lim[0], x_lim[1], n)
 
-        optimal_point = self.solve_result.x
+        if self.solve_result.success:
+            optimal_point = self.solve_result.x
+        else:
+            y_lim = ax.get_ylim()
+            quarters = (0 if math.copysign(1, dir_to[0]) < .0 else 1,
+                        0 if math.copysign(1, dir_to[1]) < .0 else 1)
+            optimal_point = [x_lim[quarters[0]], y_lim[quarters[1]]]
 
         def __update(frame, ln):
             x0 = optimal_point[0] / dir_to_magnitude * (step * frame)
@@ -379,12 +398,13 @@ class LpGraphBuilder:
         ax.text(quiver_data[0] + .15, quiver_data[1] + .15, r'$\overline{C}$', fontsize=16,
                 ha='right', va='bottom', bbox=dict(facecolor='white', alpha=TEXT_BBOX_ALPHA, edgecolor='none'))
 
-        symbols = ['(A)', '(B)']
-        for i in range(len(optimal_point)):
-            ax.text(optimal_point[i][0] + .15, optimal_point[i][1] + .15, symbols[i], fontsize=16, ha='right',
-                    va='bottom', bbox=dict(facecolor='white', alpha=TEXT_BBOX_ALPHA, edgecolor='none'))
+        if len(optimal_point) > 0:
+            symbols = ['(A)', '(B)']
+            for i in range(len(optimal_point)):
+                ax.text(optimal_point[i][0] + .15, optimal_point[i][1] + .15, symbols[i], fontsize=16, ha='right',
+                        va='bottom', bbox=dict(facecolor='white', alpha=TEXT_BBOX_ALPHA, edgecolor='none'))
 
-        ax.scatter(optimal_point[:, 0], optimal_point[:, 1], color=OPTIMAL_SOLUTION_COLOR, marker=ODR_POINT_MARKER)
+            ax.scatter(optimal_point[:, 0], optimal_point[:, 1], color=OPTIMAL_SOLUTION_COLOR, marker=ODR_POINT_MARKER)
 
         ax.plot(lines['x'], lines['y'], color=OPTIMAL_SOLUTION_COLOR, linewidth=LINES_WIDTH, linestyle=LINES_LINESTYLE)
 

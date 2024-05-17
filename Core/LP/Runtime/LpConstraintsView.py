@@ -75,6 +75,7 @@ class LpConstraintsView(tk.Frame):
 
     def __remove_constraint(self, constraint):
         constraint.pack_forget()
+        constraint.reset()
         self.constraints.remove(constraint)
         self.constraints_pool.release(constraint)
 
