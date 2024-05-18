@@ -1,11 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
-from Core.LP.Runtime.LpConstraintView import LpConstraintView
+from Core.LP.Runtime.LpInteractiveConstraintView import LpInteractiveConstraintView
 from Core.Pool import Pool
 from Core.ScrollableFrame import ScrollableFrame
+from Core.Event import Event as e_notifier
 
 
-class LpConstraintsView(tk.Frame):
+class LpInteractiveConstraintsView(tk.Frame):
     def __init__(self, master=None, cnf={}, **kw):
         super().__init__(master, cnf, **kw)
 
@@ -21,6 +22,7 @@ class LpConstraintsView(tk.Frame):
         label.pack(side=tk.LEFT)
         signs = ['>=', '<=']
         self.vars_cnsts_sign = tk.StringVar(value='>=')
+        self.vars_cnsts_sign.trace_add('write', self.__on_modify_data)
         self.vars_cnsts_combobox = ttk.Combobox(frame, textvariable=self.vars_cnsts_sign, values=signs,
                                                 state='readonly', width=4, justify=tk.LEFT)
         self.vars_cnsts_combobox.pack(side=tk.LEFT)
@@ -38,8 +40,13 @@ class LpConstraintsView(tk.Frame):
         self.constraints_pool = Pool(self.__create_constraint)
         self.constraints = []
 
+        self.modify_data_notifier = e_notifier()
+
     def remove_constraints(self):
         n = len(self.constraints)
+        if n == 0:
+            return
+
         for _ in range(n):
             constraint = self.constraints[0]
             self.__remove_constraint(constraint)
@@ -72,14 +79,25 @@ class LpConstraintsView(tk.Frame):
         constraint = self.constraints_pool.acquire()
         constraint.pack(side=tk.TOP, pady=5)
         self.constraints.append(constraint)
+        constraint.bind_on_modify_data()
 
     def __remove_constraint(self, constraint):
         constraint.pack_forget()
+        constraint.unbind_on_modify_data()
         constraint.reset()
         self.constraints.remove(constraint)
         self.constraints_pool.release(constraint)
 
     def __create_constraint(self):
-        constraint = LpConstraintView(self.__remove_constraint, self.scrollbar_frame.get_container())
+        def delete_cmnd(c):
+            self.__remove_constraint(c)
+            if len(self.constraints) > 0:
+                self.__on_modify_data()
+
+        constraint = LpInteractiveConstraintView(delete_cmnd, self.scrollbar_frame.get_container())
+        constraint.modify_data_notifier.subscribe(self.__on_modify_data)
 
         return constraint
+
+    def __on_modify_data(self, *args):
+        self.modify_data_notifier.notify(*args)

@@ -1,10 +1,9 @@
 import math
 import numpy as np
-from matplotlib.figure import Figure
+from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
 
 from matplotlib.patches import Patch
-from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.axes import Axes
 from matplotlib.patches import Polygon
@@ -45,10 +44,23 @@ TEXT_BBOX_ALPHA = 0.5
 
 
 class LpGraphBuilder:
-    def __init__(self, problem: LpProblemData, solve_result):
+    def __init__(self, problem: LpProblemData, solve_result, plot_pool):
         self.problem = problem
         self.solve_result = solve_result
+        self.plot_pool = plot_pool
         self.cache: dict = {}
+
+    def release_graph(self, plot):
+        if len(plot) == 3:
+            ani = plot[2]
+            ani.event_source.stop()
+
+        fig = plot[0]
+        fig.clf()
+        ax = plot[1]
+        ax.cla()
+        ax = fig.add_subplot()
+        self.plot_pool.release((fig, ax))
 
     def build_default_graph(self):
         if DEFAULT_GRAPH_NAME in self.cache:
@@ -322,7 +334,10 @@ class LpGraphBuilder:
                         0 if math.copysign(1, dir_to[1]) < .0 else 1)
             optimal_point = [x_lim[quarters[0]], y_lim[quarters[1]]]
 
-        def __update(frame, ln):
+        def animation_update(frame, ln):
+            if ax is None:
+                print('HELLO')
+
             x0 = optimal_point[0] / dir_to_magnitude * (step * frame)
             y0 = optimal_point[1] / dir_to_magnitude * (step * frame)
             c = x0 * objv_c[0] + y0 * objv_c[1]
@@ -331,7 +346,7 @@ class LpGraphBuilder:
 
             return ln,
 
-        fig, ax, ani = self.__add_result_data_animated_to_plot(fig, ax, __update, n)
+        fig, ax, ani = self.__add_result_data_animated_to_plot(fig, ax, animation_update, n)
         title = ('ЛП - Результат решения задачи.'
                  '\nАнимация движения целевой функции вдоль градиента'
                  r' $\overline{C}$ '
@@ -339,7 +354,7 @@ class LpGraphBuilder:
         ax.set_title(title)
         fig.tight_layout()
 
-        self.cache[RESULT_ANIMATED_GRAPH_NAME] = LpResultGraphAnimatedData(update_callback=__update, frames=n)
+        self.cache[RESULT_ANIMATED_GRAPH_NAME] = LpResultGraphAnimatedData(update_callback=animation_update, frames=n)
 
         return fig, ax, ani
 
@@ -411,7 +426,7 @@ class LpGraphBuilder:
         return fig, ax
 
     def __create_plot(self, x_lim, y_lim, polygons_datas, odr_points, lines):
-        fig, ax = plt.subplots()
+        fig, ax = self.plot_pool.acquire()
         fig.set_figheight(8)
         fig.set_figwidth(8)
 

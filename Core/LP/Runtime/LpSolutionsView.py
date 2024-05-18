@@ -1,31 +1,27 @@
 import tkinter as tk
-
-from tkinter import ttk
-
 from Core.Event import Event
 from Core.LP.Runtime.LpGraphBuilder import LpGraphBuilder
 from Core.LP.Runtime.LpSolutionView import LpSolutionView
+from Core.ScrollableNotebook import ScrollableNotebook
 
 
 class LpSolutionsView(tk.Frame):
     def __init__(self, master=None, cnf={}, **kw):
         super().__init__(master, cnf, **kw)
 
-        self.notebook = ttk.Notebook(self, padding=0)
-        self.notebook.grid(row=0, column=0, sticky=tk.NSEW)
-        self.notebook.bind('<<NotebookTabChanged>>', self.__on_tab_change)
-        self.columnconfigure(index=0, weight=1)
-        self.rowconfigure(index=0, weight=1)
+        self.notebook = ScrollableNotebook(self, enable_wheel_scroll=False, tab_menu=True)
+        self.notebook.add_tab_changed_listener(self.__on_tab_change)
+        self.notebook.pack(fill=tk.BOTH, expand=True)
 
         self.selected_solution = -1
         self.solutions = []
         self.on_tab_change_event = Event()
 
-    def add_solution(self, visualize_manager: LpGraphBuilder):
+    def add_solution(self, graph_builder):
         self.__deselect_solution(self.selected_solution)
 
         frame = tk.Frame(self.notebook)
-        solution = LpSolutionView(visualize_manager, master=frame)
+        solution = LpSolutionView(graph_builder, master=frame)
         frame.pack(fill=tk.BOTH, expand=True)
         solution.pack(fill=tk.BOTH, expand=True)
         self.solutions.append(solution)
@@ -58,10 +54,7 @@ class LpSolutionsView(tk.Frame):
         solution.pack_forget()
 
     def __get_selected_tab_id(self) -> int:
-        if self.notebook.select() == '':
-            return -1
-
-        return self.notebook.index(self.notebook.select())
+        return self.notebook.get_selected_tab_id()
 
     def __on_tab_change(self, e):
         if self.selected_solution < 0:

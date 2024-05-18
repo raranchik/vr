@@ -58,5 +58,5 @@ class ModelsView(tk.Frame):
 
         self.lp_view.pack_forget()
 
-    def get_lp_problem_view(self) -> LpModelView:
+    def get_lp_problem_view(self):
         return self.lp_view

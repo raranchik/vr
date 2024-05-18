@@ -3,6 +3,7 @@ from tkinter import ttk
 
 from Core.BanksView import BanksView
 from Core.LP.Runtime.LpController import LpController
+from Core.LP.Runtime.LpInteractiveController import LpInteractiveController
 from Core.ModelsView import ModelsView
 
 MODELS_TAB_IDX = 0
@@ -22,7 +23,9 @@ class App(tk.Tk):
         self.models_view.pack(expand=True, fill=tk.BOTH)
         self.notebook.add(self.models_view, text='Модуль "Визуализация"')
 
-        self.lp_controller = LpController(self.models_view.get_lp_problem_view())
+        lp_problem_view = self.models_view.get_lp_problem_view()
+        self.lp_controller = LpController(lp_problem_view)
+        self.lp_interactive_controller = LpInteractiveController(lp_problem_view)
 
         self.banks_view = BanksView(master=self.notebook, args=(self.notebook, self.lp_controller, self.models_view))
         self.banks_view.pack(expand=True, fill=tk.BOTH)

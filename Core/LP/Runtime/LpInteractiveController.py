@@ -1,27 +1,26 @@
 from matplotlib import pyplot as plt
-from Core.Helper.lp_helper import solve_lp
+
+from Core.Helper.input_helper import floatize
+from Core.Helper.lp_helper import *
 from Core.LP.Runtime.LpProblemData import LpProblemData
 from Core.LP.Runtime.LpGraphBuilder import LpGraphBuilder
 from Core.Pool import Pool
 
 
-class LpController:
+class LpInteractiveController:
     def __init__(self, model_view):
         self.model_view = model_view
-        self.problem_view = self.model_view.get_simple_problem_view()
+        self.problem_view = self.model_view.get_interactive_problem_view()
+        self.solution_view = self.model_view.get_interactive_solution_view()
 
-        self.problem_view.add_solve_cmnd(self.visualize_input_problem)
-        self.solutions_view = self.model_view.get_simple_solutions_view()
-        self.solutions_view.on_tab_change_event.subscribe(self.__on_change_problem)
+        self.problem_view.modify_data_notifier.subscribe(self.visualize_input_problem)
 
         def create_plot_instance():
             return plt.subplots()
 
         self.plot_pool = Pool(create_plot_instance)
 
-        self.problems = []
-
-    def visualize_input_problem(self):
+    def visualize_input_problem(self, *args):
         data = self.__read_input()
         problem = LpProblemData(data)
         if problem.is_invalid():
@@ -29,21 +28,15 @@ class LpController:
 
         self.visualize_problem(problem)
 
-    def visualize_bank_problem(self, problem):
-        self.problem_view.set_data(problem.data)
-        self.visualize_problem(problem)
-
     def visualize_problem(self, problem):
-        if self.__is_solved(problem):
-            return
-
-        self.problems.append(problem)
         solve_result = solve_lp(problem)
         visualize_manager = LpGraphBuilder(problem, solve_result, self.plot_pool)
-        self.solutions_view.add_solution(visualize_manager)
+        self.solution_view.add_solution(visualize_manager)
+
+        print(solve_result)
 
     def __read_input(self):
-        objective, constraints = self.model_view.get_problem_input()
+        objective, constraints = self.model_view.get_interactive_problem_input()
         data = {
             'objective': {},
             'constraints': {},
@@ -59,7 +52,7 @@ class LpController:
     def __read_objective(self, objective_input, container):
         container['goal'] = objective_input[0].get()
         coeffs_vars = objective_input[1]
-        container['coefficients'] = (coeffs_vars[0].get(), coeffs_vars[1].get())
+        container['coefficients'] = (floatize(coeffs_vars[0].get()), floatize(coeffs_vars[1].get()))
 
     def __read_constraints(self, constraints_input, container):
         container['coefficients'] = []
@@ -67,7 +60,7 @@ class LpController:
         for constraint in constraints_input:
             lhs = constraint.get_coeffs()
             rhs = constraint.get_bound()
-            container['coefficients'].append((lhs[0].get(), lhs[1].get(), rhs.get()))
+            container['coefficients'].append((floatize(lhs[0].get()), floatize(lhs[1].get()), floatize(rhs.get())))
 
             sign = constraint.get_sign()
             container['signs'].append(sign.get())
@@ -76,14 +69,3 @@ class LpController:
         sign = constraints_input.get()
         container['coefficients'] = [(.0, 1., .0), (1., .0, .0)]
         container['signs'] = [sign, sign]
-
-    def __on_change_problem(self, idx):
-        problem = self.problems[idx]
-        self.problem_view.set_data(problem.data)
-
-    def __is_solved(self, lhs):
-        for rhs in self.problems:
-            if lhs == rhs:
-                return True
-
-        return False

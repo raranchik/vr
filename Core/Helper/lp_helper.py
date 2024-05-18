@@ -22,9 +22,9 @@ def solve_lp(problem):
     bounds = []
     for var_cons, sign in zip(problem.get_var_consrts_c(), problem.get_var_consrts_s()):
         if sign == '>=':
-            bounds.append((var_cons[0], None))
+            bounds.append((.0, None))
         elif sign == '<=':
-            bounds.append((None, var_cons[0]))
+            bounds.append((None, .0))
 
     if goal == 'max':
         c = -c

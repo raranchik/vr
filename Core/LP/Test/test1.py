@@ -1,27 +1,23 @@
-from Core.Helper.lp_bank import get_bank
-from Core.Helper.lp_helper import solve_lp
-from Core.LP.Runtime.LpProblemData import LpProblemData
+from tkinter import *
 
-bank = get_bank()
-for key, value in bank.items():
-    print('##########################################################################')
-    print(f'Problem {key}')
-    problem = LpProblemData(value['data'])
-    solve_result = solve_lp(problem)
-    print(solve_result.status)
-    if solve_result.status == 0:
-        print('Optimization proceeding nominally.')
-        optimal_value = solve_result.fun if problem.get_goal() == 'min' else -solve_result.fun
-        print(f'Goal: {problem.get_goal()}')
-        print(f'Optimal value: {optimal_value}')
-        print(f'Optimal point: {solve_result.x}')
-    elif solve_result.status == 1:
-        print('Iteration limit reached.')
-    elif solve_result.status == 2:
-        print('Problem appears to be infeasible.')
-    elif solve_result.status == 3:
-        print('Problem appears to be unbounded.')
-    elif solve_result.status == 4:
-        print('Numerical difficulties encountered.')
+from Core.ScrollableNotebook import ScrollableNotebook
 
-    print(solve_result)
+root = Tk()
+root.title("Example")
+notebook = ScrollableNotebook(root, enable_wheel_scroll=False, tab_menu=True)
+frame1 = Frame(notebook)
+frame2 = Frame(notebook)
+frame3 = Frame(notebook)
+frame4 = Frame(notebook)
+notebook.add(frame1, text="I am Tab One")
+notebook.add(frame2, text="I am Tab Two")
+notebook.add(frame3, text="I am Tab Three")
+notebook.add(frame4, text="I Forgot How to Count")
+notebook.pack(fill="both", expand=True)
+text = Text(frame1)
+text.pack()
+Label(frame2, text="I am Frame 2").pack()
+Label(frame3, text="I am Frame 3").pack()
+Label(frame4, text="You know i'm Frame 4").pack()
+text.insert(INSERT, "Hello World!")
+root.mainloop()

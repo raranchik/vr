@@ -7,7 +7,7 @@ class LpConstraintView(tk.Frame):
     def __init__(self, delete_cmnd, master=None, cnf={}, **kw):
         super().__init__(master, cnf, **kw)
 
-        self.lhs: list[tk.DoubleVar] = []
+        self.lhs = []
         n = 2
         for cnstr_id in range(n):
             x_var = tk.DoubleVar(value=.0)
