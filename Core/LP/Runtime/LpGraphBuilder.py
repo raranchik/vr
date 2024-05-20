@@ -319,24 +319,27 @@ class LpGraphBuilder:
         objv_c = self.problem.get_objv_c()
 
         dir_to = (objv_c[0], objv_c[1])
-        dir_to_magnitude = np.linalg.norm(dir_to)
 
-        step = 0.005
-        n = int(dir_to_magnitude / step)
+        n = 100
         x_lim = ax.get_xlim()
         x = np.linspace(x_lim[0], x_lim[1], n)
 
+        y_lim = ax.get_ylim()
+        end_quart = (0 if math.copysign(1, dir_to[0]) < .0 else 1,
+                     0 if math.copysign(1, dir_to[1]) < .0 else 1)
+        start_quart = (0 if math.copysign(1, dir_to[0]) > .0 else 1,
+                       0 if math.copysign(1, dir_to[1]) > .0 else 1)
+        start_point = [x_lim[start_quart[0]], y_lim[start_quart[1]]]
         if self.solve_result.success:
-            optimal_point = self.solve_result.x
+            end_point = self.solve_result.x
         else:
-            y_lim = ax.get_ylim()
-            quarters = (0 if math.copysign(1, dir_to[0]) < .0 else 1,
-                        0 if math.copysign(1, dir_to[1]) < .0 else 1)
-            optimal_point = [x_lim[quarters[0]], y_lim[quarters[1]]]
+            end_point = [x_lim[end_quart[0]], y_lim[end_quart[1]]]
 
         def animation_update(frame, ln):
-            x0 = optimal_point[0] / dir_to_magnitude * (step * frame)
-            y0 = optimal_point[1] / dir_to_magnitude * (step * frame)
+            t = frame / n
+            x0 = start_point[0] + t * (end_point[0] - start_point[0])
+            y0 = start_point[1] + t * (end_point[1] - start_point[1])
+
             c = x0 * objv_c[0] + y0 * objv_c[1]
             y = (c - objv_c[0] * x) / objv_c[1]
             ln.set_data(x, y)
