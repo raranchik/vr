@@ -319,7 +319,7 @@ class LpGraphBuilder:
         objv_c = self.problem.get_objv_c()
 
         dir_to = (objv_c[0], objv_c[1])
-        dir_to_magnitude = np.linalg.norm(dir_to) / 2.
+        dir_to_magnitude = np.linalg.norm(dir_to)
 
         step = 0.005
         n = int(dir_to_magnitude / step)
@@ -335,9 +335,6 @@ class LpGraphBuilder:
             optimal_point = [x_lim[quarters[0]], y_lim[quarters[1]]]
 
         def animation_update(frame, ln):
-            if ax is None:
-                print('HELLO')
-
             x0 = optimal_point[0] / dir_to_magnitude * (step * frame)
             y0 = optimal_point[1] / dir_to_magnitude * (step * frame)
             c = x0 * objv_c[0] + y0 * objv_c[1]

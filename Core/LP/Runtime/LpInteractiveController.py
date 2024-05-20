@@ -33,8 +33,6 @@ class LpInteractiveController:
         visualize_manager = LpGraphBuilder(problem, solve_result, self.plot_pool)
         self.solution_view.add_solution(visualize_manager)
 
-        print(solve_result)
-
     def __read_input(self):
         objective, constraints = self.model_view.get_interactive_problem_input()
         data = {

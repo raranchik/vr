@@ -16,7 +16,7 @@ class ModelsView(tk.Frame):
         separator = ttk.Separator(self, orient=tk.VERTICAL)
         separator.pack(side=tk.LEFT, fill=tk.Y)
 
-        self.lp_button = tk.Button(self.buttons_list, text='ЛП', padx=20,
+        self.lp_button = tk.Button(self.buttons_list, text='Линейное\nпрограммирование', padx=20,
                                    command=self.select_lp_view)
         self.lp_button.pack(side=tk.TOP, padx=20, pady=20)
 

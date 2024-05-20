@@ -1,8 +1,12 @@
+import os
 import tkinter as tk
+
+from PIL import ImageTk, Image
 
 from Core.Helper.lp_bank import get_bank
 from Core.LP.Runtime.LpProblemData import LpProblemData
 from Core.ScrollableFrame import ScrollableFrame
+from definitions import LP_ASSETS_PATH
 
 
 class LpBankView(tk.Frame):
@@ -15,6 +19,7 @@ class LpBankView(tk.Frame):
         self.rowconfigure(0, weight=1)
 
         self.bank = get_bank()
+        self.previews = []
 
         container = self.scrollable_frame.get_container()
         for i in range(2):
@@ -35,12 +40,18 @@ class LpBankView(tk.Frame):
 
             text = data['title']
             label = tk.Label(frame, text=text)
-            label.pack(side=tk.TOP)
+            label.pack(side=tk.TOP, pady=5)
+
+            path = os.path.join(LP_ASSETS_PATH, f'{i}_result_graph.png')
+            img = ImageTk.PhotoImage(Image.open(path))
+            self.previews.append(img)
+            label = tk.Label(frame, image=img)
+            label.pack(side=tk.TOP, pady=5)
 
             text = 'Перейти к решению'
             button = tk.Button(frame, text=text, padx=20)
             button.configure(command=lambda key=str(i): self.select_problem(key))
-            button.pack(side=tk.BOTTOM)
+            button.pack(side=tk.BOTTOM, pady=5)
 
             row += 1
 

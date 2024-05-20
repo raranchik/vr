@@ -13,7 +13,7 @@ BANKS_TAB_IDX = 1
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("VR")
+        self.title("Визуализатор")
         self.setup_window()
 
         self.notebook = ttk.Notebook(self)

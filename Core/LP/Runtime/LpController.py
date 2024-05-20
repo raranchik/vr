@@ -39,8 +39,8 @@ class LpController:
 
         self.problems.append(problem)
         solve_result = solve_lp(problem)
-        visualize_manager = LpGraphBuilder(problem, solve_result, self.plot_pool)
-        self.solutions_view.add_solution(visualize_manager)
+        graph_builder = LpGraphBuilder(problem, solve_result, self.plot_pool)
+        self.solutions_view.add_solution(graph_builder)
 
     def __read_input(self):
         objective, constraints = self.model_view.get_problem_input()
