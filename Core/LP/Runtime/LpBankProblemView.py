@@ -6,7 +6,7 @@ from PIL import ImageTk, Image
 from Core.Helper.lp_bank import get_bank
 from Core.LP.Runtime.LpProblemData import LpProblemData
 from Core.ScrollableFrame import ScrollableFrame
-from definitions import LP_ASSETS_PATH
+from definitions import LP_ASSETS_PATH, resource_path
 
 
 class LpBankView(tk.Frame):
@@ -42,7 +42,7 @@ class LpBankView(tk.Frame):
             label = tk.Label(frame, text=text)
             label.pack(side=tk.TOP, pady=5)
 
-            path = os.path.join(LP_ASSETS_PATH, f'{i}_result_graph.png')
+            path = resource_path(os.path.join(LP_ASSETS_PATH, f'{i}_result_graph.png'))
             img = ImageTk.PhotoImage(Image.open(path))
             self.previews.append(img)
             label = tk.Label(frame, image=img)

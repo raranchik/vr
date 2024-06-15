@@ -15,10 +15,16 @@ def get_root_dir():
     return base_path
 
 
+def resource_path(relative):
+    if hasattr(sys, "_MEIPASS"):
+        return os.path.join(sys._MEIPASS, relative)
+    return os.path.join(relative)
+
+
 OS_SEP = os.sep
 ROOT_DIR = get_root_dir()
 
 IPOPT_PATH = os.path.join(ROOT_DIR, f'solvers{OS_SEP}ipopt{OS_SEP}bin', 'ipopt.exe')
 CBC_PATH = os.path.join(ROOT_DIR, f'solvers{OS_SEP}cbc{OS_SEP}bin', 'cbc.exe')
 
-LP_ASSETS_PATH = os.path.join(ROOT_DIR, f'Core{OS_SEP}LP{OS_SEP}Assets{OS_SEP}')
+LP_ASSETS_PATH = os.path.join(f'Core{OS_SEP}LP{OS_SEP}Assets{OS_SEP}')
