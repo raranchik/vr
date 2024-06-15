@@ -293,7 +293,7 @@ class LpGraphBuilder:
             else:
                 optimal_point = np.array([optimal_point])
 
-            text = 'Оптимальное значение ' + ", ".join(symbols)
+            text = "Точка оптимума " + ", ".join(symbols) + f", $F(A)= $" + str(optimal_value)
             legend_handles.append(Line2D([.0], [.0], label=text, marker='o',
                                          color=OPTIMAL_SOLUTION_COLOR, linestyle=''))
         else:
